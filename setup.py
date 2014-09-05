@@ -18,7 +18,11 @@
 
 from distutils.core import setup, Extension
 import sys
-import commands
+
+if sys.version_info < (3,0):
+    import commands as subprocess
+else:
+    import subprocess
 
 setup (
     name = "kerberos",
@@ -27,8 +31,8 @@ setup (
     ext_modules = [
         Extension(
             "kerberos",
-            extra_link_args = commands.getoutput("krb5-config --libs gssapi").split(),
-            extra_compile_args = commands.getoutput("krb5-config --cflags gssapi").split(),
+            extra_link_args = subprocess.getoutput("krb5-config --libs gssapi").split(),
+            extra_compile_args = subprocess.getoutput("krb5-config --cflags gssapi").split(),
             sources = [
                 "src/kerberos.c",
                 "src/kerberosbasic.c",
