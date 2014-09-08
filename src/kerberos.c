@@ -25,6 +25,10 @@ PyObject *KrbException_class;
 PyObject *BasicAuthException_class;
 PyObject *GssException_class;
 
+
+#define PYKERBEROS "PyKerberos"
+#define KERBEROS "kerberos"
+
 static PyObject *checkPassword(PyObject *self, PyObject *args)
 {
     const char *user;
@@ -55,7 +59,7 @@ static PyObject *authGSSClientInit(PyObject *self, PyObject *args)
         return NULL;
 	
 	state = (gss_client_state *) malloc(sizeof(gss_client_state));
-	pystate = PyCObject_FromVoidPtr(state, NULL);
+	pystate = PyCapsule_New(state, PYKERBEROS, NULL);
 	
 	result = authenticate_gss_client_init(service, state);
 	if (result == AUTH_GSS_ERROR)
@@ -70,16 +74,16 @@ static PyObject *authGSSClientClean(PyObject *self, PyObject *args)
 	PyObject *pystate;
     int result = 0;
 	
-    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCObject_Check(pystate))
+    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCapsule_CheckExact(pystate))
         return NULL;
 	
-	state = (gss_client_state *)PyCObject_AsVoidPtr(pystate);
+    state = (gss_client_state *)PyCapsule_GetPointer(pystate, PYKERBEROS);
 	if (state != NULL)
 	{
 		result = authenticate_gss_client_clean(state);
 		
 		free(state);
-		PyCObject_SetVoidPtr(pystate, NULL);
+		PyCapsule_SetPointer(pystate, NULL);
 	}
 	
     return Py_BuildValue("i", result);
@@ -92,10 +96,10 @@ static PyObject *authGSSClientStep(PyObject *self, PyObject *args)
 	char *challenge;
     int result = 0;
 	
-    if (!PyArg_ParseTuple(args, "Os", &pystate, &challenge) || !PyCObject_Check(pystate))
+    if (!PyArg_ParseTuple(args, "Os", &pystate, &challenge) || !PyCapsule_CheckExact(pystate))
         return NULL;
 	
-	state = (gss_client_state *)PyCObject_AsVoidPtr(pystate);
+    state = (gss_client_state *)PyCapsule_GetPointer(pystate, PYKERBEROS);
 	if (state == NULL)
 		return NULL;
 
@@ -111,10 +115,10 @@ static PyObject *authGSSClientResponse(PyObject *self, PyObject *args)
     gss_client_state *state;
 	PyObject *pystate;
 	
-    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCObject_Check(pystate))
+    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCapsule_CheckExact(pystate))
         return NULL;
 	
-	state = (gss_client_state *)PyCObject_AsVoidPtr(pystate);
+    state = (gss_client_state *)PyCapsule_GetPointer(pystate, PYKERBEROS);
 	if (state == NULL)
 		return NULL;
 	
@@ -126,10 +130,10 @@ static PyObject *authGSSClientUserName(PyObject *self, PyObject *args)
     gss_client_state *state;
 	PyObject *pystate;
 	
-    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCObject_Check(pystate))
+    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCapsule_CheckExact(pystate))
         return NULL;
 	
-	state = (gss_client_state *)PyCObject_AsVoidPtr(pystate);
+    state = (gss_client_state *)PyCapsule_GetPointer(pystate, PYKERBEROS);
 	if (state == NULL)
 		return NULL;
 	
@@ -147,7 +151,7 @@ static PyObject *authGSSServerInit(PyObject *self, PyObject *args)
         return NULL;
 	
 	state = (gss_server_state *) malloc(sizeof(gss_server_state));
-	pystate = PyCObject_FromVoidPtr(state, NULL);
+	pystate =  PyCapsule_New(state, PYKERBEROS, NULL);
 	
 	result = authenticate_gss_server_init(service, state);
 	if (result == AUTH_GSS_ERROR)
@@ -162,16 +166,16 @@ static PyObject *authGSSServerClean(PyObject *self, PyObject *args)
 	PyObject *pystate;
     int result = 0;
 	
-    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCObject_Check(pystate))
+    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCapsule_CheckExact(pystate))
         return NULL;
 	
-	state = (gss_server_state *)PyCObject_AsVoidPtr(pystate);
+    state = (gss_server_state *)PyCapsule_GetPointer(pystate, PYKERBEROS);
 	if (state != NULL)
 	{
 		result = authenticate_gss_server_clean(state);
 		
 		free(state);
-		PyCObject_SetVoidPtr(pystate, NULL);
+		PyCapsule_SetPointer(pystate, PYKERBEROS);
 	}
 	
     return Py_BuildValue("i", result);
@@ -184,10 +188,10 @@ static PyObject *authGSSServerStep(PyObject *self, PyObject *args)
 	char *challenge;
     int result = 0;
 	
-    if (!PyArg_ParseTuple(args, "Os", &pystate, &challenge) || !PyCObject_Check(pystate))
+    if (!PyArg_ParseTuple(args, "Os", &pystate, &challenge) || !PyCapsule_CheckExact(pystate))
         return NULL;
 	
-	state = (gss_server_state *)PyCObject_AsVoidPtr(pystate);
+    state = (gss_server_state *)PyCapsule_GetPointer(pystate, PYKERBEROS);
 	if (state == NULL)
 		return NULL;
 	
@@ -203,10 +207,10 @@ static PyObject *authGSSServerResponse(PyObject *self, PyObject *args)
     gss_server_state *state;
 	PyObject *pystate;
 	
-    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCObject_Check(pystate))
+    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCapsule_CheckExact(pystate))
         return NULL;
 	
-	state = (gss_server_state *)PyCObject_AsVoidPtr(pystate);
+    state = (gss_server_state *)PyCapsule_GetPointer(pystate, PYKERBEROS);
 	if (state == NULL)
 		return NULL;
 	
@@ -218,10 +222,10 @@ static PyObject *authGSSServerUserName(PyObject *self, PyObject *args)
     gss_server_state *state;
 	PyObject *pystate;
 	
-    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCObject_Check(pystate))
+    if (!PyArg_ParseTuple(args, "O", &pystate) || !PyCapsule_CheckExact(pystate))
         return NULL;
 	
-	state = (gss_server_state *)PyCObject_AsVoidPtr(pystate);
+    state = (gss_server_state *)PyCapsule_New(pystate, PYKERBEROS, NULL);
 	if (state == NULL)
 		return NULL;
 	
@@ -254,11 +258,37 @@ static PyMethodDef KerberosMethods[] = {
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
+
+#if PY_MAJOR_VERSION >= 3
+struct module_state {
+    PyObject *error;
+};
+
+static struct PyModuleDef moduledef = {
+        PyModuleDef_HEAD_INIT,
+        KERBEROS,
+        NULL,
+        sizeof(struct module_state),
+        KerberosMethods,
+        NULL,
+        NULL, //myextension_traverse,
+        NULL, //myextension_clear,
+        NULL
+};
+#endif
+
+
+
 PyMODINIT_FUNC initkerberos(void)
 {
     PyObject *m,*d;
 
+#if PY_MAJOR_VERSION >= 3
+    m = PyModule_Create(&moduledef);
+#else
     m = Py_InitModule("kerberos", KerberosMethods);
+
+#endif
 
     d = PyModule_GetDict(m);
 
@@ -282,4 +312,9 @@ PyMODINIT_FUNC initkerberos(void)
 error:
     if (PyErr_Occurred())
 		PyErr_SetString(PyExc_ImportError, "kerberos: init failed");
+
+#if PY_MAJOR_VERSION >= 3
+    return m;
+#endif
+
 }
